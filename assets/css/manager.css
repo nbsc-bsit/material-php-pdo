@@ -1,0 +1,93 @@
+/* =========================================
+   Manager
+   ========================================= */
+
+.mui-chip-manager {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.manager-stat-grid {
+    grid-template-columns: repeat(2, minmax(200px, 1fr));
+    max-width: 600px;
+}
+
+/* =========================================
+   Manager Capabilities
+   ========================================= */
+
+.capability-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.capability-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.capability-card h3 {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.capability-card p {
+    margin: 0;
+    color: #757575;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.capability-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    min-width: 72px;
+    height: 36px;
+    padding: 0 8px;
+
+    box-sizing: border-box;
+
+    border-radius: 4px;
+
+    background: #fff3e0;
+    color: #e65100;
+
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.capability-card-restricted {
+    border-left: 4px solid #bdbdbd;
+}
+
+.capability-card-restricted .capability-icon {
+    background: #f5f5f5;
+    color: #757575;
+}
+
+/* =========================================
+   Responsive Manager Layout
+   ========================================= */
+
+@media (max-width: 900px) {
+
+    .capability-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
+
+@media (max-width: 700px) {
+
+    .manager-stat-grid {
+        grid-template-columns: 1fr;
+        max-width: none;
+    }
+
+}
