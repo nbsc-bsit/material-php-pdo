@@ -26,7 +26,7 @@ function logActivity($pdo, $user_id, $email, $action, $status = 'success') {
         $user_agent = substr($_SERVER['HTTP_USER_AGENT'] ?? 'Unknown', 0, 255);
         
         $stmt = $pdo->prepare("
-            INSERT INTO activity_logs (user_id, email, action, status, ip_address, user_agent) 
+            INSERT INTO activity_logs (user_id, user_email, activity_log_action, activity_log_status, activity_log_ip_address, activity_log_user_agent) 
             VALUES (?, ?, ?, ?, ?, ?)
         ");
         
