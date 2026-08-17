@@ -3,10 +3,10 @@ session_start();
 
 // Email configuration (for verification)
 define('MAIL_FROM', 'noreply@yourdomain.com');
-define('BASE_URL', 'http://localhost/php-pdo');
+define('BASE_URL', 'http://localhost/material-php-pdo');
 
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'sample_php_pdo');
+define('DB_NAME', 'material_pdo');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
