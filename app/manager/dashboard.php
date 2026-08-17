@@ -1,98 +1,162 @@
 <?php
+
 require_once '../../config/config.php';
 require_once '../../config/functions.php';
 require_once '../../includes/activity-logger.php';
 
 requireRole('manager');
 
-// Get statistics for manager
+
+// ==================================================
+// USER STATISTICS
+// ==================================================
+
+// Total regular users
 $stmt = $pdo->query("
     SELECT COUNT(*) AS total
     FROM users
-    WHERE role = 'user'
+    WHERE user_role = 'user'
 ");
+
 $totalUsers = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
+
+// Unverified regular users
 $stmt = $pdo->query("
     SELECT COUNT(*) AS total
     FROM users
-    WHERE role = 'user'
-    AND is_verified = 0
+    WHERE user_role = 'user'
+    AND user_is_verified = 0
 ");
+
 $unverifiedUsers = $stmt->fetch(PDO::FETCH_ASSOC)['total'];
 
-// Get activity statistics for manager and users only
+
+// ==================================================
+// DAILY ACTIVITY - LAST 7 DAYS
+// ==================================================
+
 $stmt = $pdo->query("
     SELECT
-        DATE(al.created_at) AS date,
+        DATE(al.activity_log_created_at) AS date,
         COUNT(*) AS count
     FROM activity_logs al
-    LEFT JOIN users u ON al.user_id = u.id
-    WHERE al.created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+
+    LEFT JOIN users u
+        ON al.user_id = u.user_id
+
+    WHERE al.activity_log_created_at >=
+        DATE_SUB(NOW(), INTERVAL 7 DAY)
+
     AND (
-        u.role IN ('manager', 'user')
-        OR u.role IS NULL
+        u.user_role IN ('manager', 'user')
+        OR u.user_role IS NULL
     )
-    GROUP BY DATE(al.created_at)
+
+    GROUP BY DATE(al.activity_log_created_at)
+
     ORDER BY date ASC
 ");
+
 $dailyActivity = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Get action distribution for manager and users
+
+// ==================================================
+// ACTION DISTRIBUTION - LAST 30 DAYS
+// ==================================================
+
 $stmt = $pdo->query("
     SELECT
-        al.action,
+        al.activity_log_action AS action,
         COUNT(*) AS count
     FROM activity_logs al
-    LEFT JOIN users u ON al.user_id = u.id
-    WHERE al.created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+
+    LEFT JOIN users u
+        ON al.user_id = u.user_id
+
+    WHERE al.activity_log_created_at >=
+        DATE_SUB(NOW(), INTERVAL 30 DAY)
+
     AND (
-        u.role IN ('manager', 'user')
-        OR u.role IS NULL
+        u.user_role IN ('manager', 'user')
+        OR u.user_role IS NULL
     )
-    GROUP BY al.action
+
+    GROUP BY al.activity_log_action
+
     ORDER BY count DESC
+
     LIMIT 10
 ");
+
 $actionStats = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 $title = 'Manager Dashboard';
 
 renderHeader($title);
+
 ?>
 
 <link rel="stylesheet" href="../../assets/css/admin.css">
 
 <?php include '../../includes/navbar.php'; ?>
 
+
 <div class="admin-layout">
+
 
     <?php include '../../includes/sidebar.php'; ?>
 
+
     <main class="admin-main">
 
-        <!-- Page Header -->
+
+        <!-- ==========================================
+             PAGE HEADER
+        =========================================== -->
+
         <div class="page-header">
+
             <div>
-                <h1>Manager Dashboard</h1>
+
+                <h1>
+                    Manager Dashboard
+                </h1>
+
                 <p class="page-subtitle">
                     User management and team activity overview
                 </p>
+
             </div>
+
         </div>
 
-        <!-- Welcome -->
+
+        <!-- ==========================================
+             WELCOME
+        =========================================== -->
+
         <section class="welcome-card">
 
             <div>
+
                 <span class="welcome-label">
                     Welcome back
                 </span>
 
                 <h2>
-                    <?php echo htmlspecialchars($_SESSION['email']); ?>
+
+                    <?php
+                    echo htmlspecialchars(
+                        $_SESSION['email']
+                    );
+                    ?>
+
                 </h2>
+
             </div>
+
 
             <span class="mui-chip mui-chip-manager">
                 Manager
@@ -100,16 +164,29 @@ renderHeader($title);
 
         </section>
 
-        <!-- User Statistics -->
+
+        <!-- ==========================================
+             USER STATISTICS
+        =========================================== -->
+
         <section>
 
             <div class="section-header">
-                <h2>User Statistics</h2>
+
+                <h2>
+                    User Statistics
+                </h2>
+
             </div>
+
 
             <div class="stat-grid manager-stat-grid">
 
+
+                <!-- TOTAL USERS -->
+
                 <div class="stat-card">
+
                     <div class="stat-content">
 
                         <span class="stat-label">
@@ -117,13 +194,22 @@ renderHeader($title);
                         </span>
 
                         <strong class="stat-value">
-                            <?php echo $totalUsers; ?>
+
+                            <?php
+                            echo $totalUsers;
+                            ?>
+
                         </strong>
 
                     </div>
+
                 </div>
 
+
+                <!-- UNVERIFIED USERS -->
+
                 <div class="stat-card stat-card-warning">
+
                     <div class="stat-content">
 
                         <span class="stat-label">
@@ -131,23 +217,37 @@ renderHeader($title);
                         </span>
 
                         <strong class="stat-value">
-                            <?php echo $unverifiedUsers; ?>
+
+                            <?php
+                            echo $unverifiedUsers;
+                            ?>
+
                         </strong>
 
                     </div>
+
                 </div>
+
 
             </div>
 
         </section>
 
-        <!-- Activity Analytics -->
+
+        <!-- ==========================================
+             ACTIVITY ANALYTICS
+        =========================================== -->
+
         <section>
 
             <div class="section-header">
 
                 <div>
-                    <h2>Activity Analytics</h2>
+
+                    <h2>
+                        Activity Analytics
+                    </h2>
+
                 </div>
 
                 <span class="section-meta">
@@ -156,14 +256,21 @@ renderHeader($title);
 
             </div>
 
+
             <div class="chart-grid">
 
-                <!-- Daily Activity -->
+
+                <!-- ==================================
+                     DAILY ACTIVITY
+                =================================== -->
+
                 <div class="mui-card">
 
                     <div class="card-header">
 
-                        <h3>Daily Activity</h3>
+                        <h3>
+                            Daily Activity
+                        </h3>
 
                         <span>
                             Last 7 days
@@ -171,18 +278,29 @@ renderHeader($title);
 
                     </div>
 
+
                     <div class="chart-wrapper">
-                        <canvas id="dailyActivityChart"></canvas>
+
+                        <canvas
+                            id="dailyActivityChart"
+                        ></canvas>
+
                     </div>
 
                 </div>
 
-                <!-- Top Actions -->
+
+                <!-- ==================================
+                     TOP ACTIONS
+                =================================== -->
+
                 <div class="mui-card">
 
                     <div class="card-header">
 
-                        <h3>Top Actions</h3>
+                        <h3>
+                            Top Actions
+                        </h3>
 
                         <span>
                             Last 30 days
@@ -190,24 +308,42 @@ renderHeader($title);
 
                     </div>
 
+
                     <div class="chart-wrapper">
-                        <canvas id="actionChart"></canvas>
+
+                        <canvas
+                            id="actionChart"
+                        ></canvas>
+
                     </div>
 
                 </div>
+
 
             </div>
 
         </section>
 
-        <!-- Manager Capabilities -->
+
+        <!-- ==========================================
+             MANAGER CAPABILITIES
+        =========================================== -->
+
         <section>
 
             <div class="section-header">
-                <h2>Manager Capabilities</h2>
+
+                <h2>
+                    Manager Capabilities
+                </h2>
+
             </div>
 
+
             <div class="capability-grid">
+
+
+                <!-- MANAGE USERS -->
 
                 <div class="mui-card capability-card">
 
@@ -216,14 +352,22 @@ renderHeader($title);
                     </div>
 
                     <div>
-                        <h3>Manage Users</h3>
+
+                        <h3>
+                            Manage Users
+                        </h3>
 
                         <p>
-                            Create, edit, and delete regular user accounts.
+                            Create, edit, and delete regular
+                            user accounts.
                         </p>
+
                     </div>
 
                 </div>
+
+
+                <!-- REPORTS -->
 
                 <div class="mui-card capability-card">
 
@@ -232,14 +376,22 @@ renderHeader($title);
                     </div>
 
                     <div>
-                        <h3>View Reports</h3>
+
+                        <h3>
+                            View Reports
+                        </h3>
 
                         <p>
-                            Access user information and activity analytics.
+                            Access user information and
+                            activity analytics.
                         </p>
+
                     </div>
 
                 </div>
+
+
+                <!-- TEAM -->
 
                 <div class="mui-card capability-card">
 
@@ -248,14 +400,22 @@ renderHeader($title);
                     </div>
 
                     <div>
-                        <h3>Team Management</h3>
+
+                        <h3>
+                            Team Management
+                        </h3>
 
                         <p>
-                            Monitor and oversee regular user activities.
+                            Monitor and oversee regular
+                            user activities.
                         </p>
+
                     </div>
 
                 </div>
+
+
+                <!-- RESTRICTED -->
 
                 <div class="mui-card capability-card capability-card-restricted">
 
@@ -264,100 +424,194 @@ renderHeader($title);
                     </div>
 
                     <div>
-                        <h3>Access Restrictions</h3>
+
+                        <h3>
+                            Access Restrictions
+                        </h3>
 
                         <p>
-                            Admin activities and administrator or manager
-                            accounts are outside your management scope.
+                            Admin activities and administrator
+                            or manager accounts are outside
+                            your management scope.
                         </p>
 
                     </div>
 
                 </div>
 
+
             </div>
 
         </section>
+
 
     </main>
 
 </div>
 
+
 <?php include '../../includes/footer.php'; ?>
 
-<!-- Chart.js -->
+
+<!-- ==========================================
+     CHART.JS
+=========================================== -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
+
 <script>
-const dailyData = <?php echo json_encode($dailyActivity); ?>;
-const actionData = <?php echo json_encode($actionStats); ?>;
 
-/*
- * Daily Activity
- */
-new Chart(document.getElementById('dailyActivityChart'), {
-    type: 'line',
 
-    data: {
-        labels: dailyData.map(item => item.date),
+// ==================================================
+// PHP DATA
+// ==================================================
 
-        datasets: [{
-            label: 'Activities',
+const dailyData =
+    <?php echo json_encode($dailyActivity); ?>;
 
-            data: dailyData.map(item => item.count),
+const actionData =
+    <?php echo json_encode($actionStats); ?>;
 
-            tension: 0.3,
-            fill: true
-        }]
-    },
 
-    options: {
-        responsive: true,
+// ==================================================
+// DAILY ACTIVITY
+// ==================================================
 
-        plugins: {
-            legend: {
-                display: false
-            }
+new Chart(
+    document.getElementById('dailyActivityChart'),
+    {
+
+        type: 'line',
+
+        data: {
+
+            labels: dailyData.map(
+                item => item.date
+            ),
+
+            datasets: [
+
+                {
+
+                    label: 'Activities',
+
+                    data: dailyData.map(
+                        item => item.count
+                    ),
+
+                    tension: 0.3,
+
+                    fill: true
+
+                }
+
+            ]
+
         },
 
-        scales: {
-            y: {
-                beginAtZero: true
+        options: {
+
+            responsive: true,
+
+            plugins: {
+
+                legend: {
+
+                    display: false
+
+                }
+
+            },
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    ticks: {
+
+                        precision: 0
+
+                    }
+
+                }
+
             }
+
         }
+
     }
-});
+);
 
-/*
- * Top Actions
- */
-new Chart(document.getElementById('actionChart'), {
-    type: 'bar',
 
-    data: {
-        labels: actionData.map(item => item.action),
+// ==================================================
+// TOP ACTIONS
+// ==================================================
 
-        datasets: [{
-            label: 'Count',
+new Chart(
+    document.getElementById('actionChart'),
+    {
 
-            data: actionData.map(item => item.count)
-        }]
-    },
+        type: 'bar',
 
-    options: {
-        responsive: true,
+        data: {
 
-        plugins: {
-            legend: {
-                display: false
-            }
+            labels: actionData.map(
+                item => item.action
+            ),
+
+            datasets: [
+
+                {
+
+                    label: 'Count',
+
+                    data: actionData.map(
+                        item => item.count
+                    )
+
+                }
+
+            ]
+
         },
 
-        scales: {
-            y: {
-                beginAtZero: true
+        options: {
+
+            responsive: true,
+
+            plugins: {
+
+                legend: {
+
+                    display: false
+
+                }
+
+            },
+
+            scales: {
+
+                y: {
+
+                    beginAtZero: true,
+
+                    ticks: {
+
+                        precision: 0
+
+                    }
+
+                }
+
             }
+
         }
+
     }
-});
+);
+
+
 </script>
