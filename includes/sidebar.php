@@ -17,7 +17,7 @@
         </a>
 
         <a
-            href="<?php echo BASE_URL; ?>/app/users/user-create.php"
+            href="<?php echo BASE_URL; ?>/app/users/create.php"
             class="sidebar-link"
         >
             <span>Create User</span>
