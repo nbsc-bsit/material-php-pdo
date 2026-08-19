@@ -369,7 +369,7 @@ renderHeader('User Management');
 
                                             <!-- View -->
                                             <a
-                                                href="user-view.php?user_id=<?php echo (int) $user['user_id']; ?>"
+                                                href="view.php?user_id=<?php echo (int) $user['user_id']; ?>"
                                                 class="users-action users-action-view"
                                             >
                                                 View
@@ -385,7 +385,7 @@ renderHeader('User Management');
                                             ): ?>
 
                                                 <a
-                                                    href="user-update.php?user_id=<?php echo (int) $user['user_id']; ?>"
+                                                    href="update.php?user_id=<?php echo (int) $user['user_id']; ?>"
                                                     class="users-action users-action-edit"
                                                 >
                                                     Edit
@@ -403,7 +403,7 @@ renderHeader('User Management');
                                             ): ?>
 
                                                 <a
-                                                    href="user-delete.php?user_id=<?php echo (int) $user['user_id']; ?>"
+                                                    href="delete.php?user_id=<?php echo (int) $user['user_id']; ?>"
                                                     class="users-action users-action-delete"
                                                     onclick="return confirm('Are you sure you want to delete this user?');"
                                                 >

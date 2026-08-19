@@ -25,7 +25,7 @@ if ($currentRole !== 'admin' && $currentRole !== 'manager') {
 
 $userId = filter_input(
     INPUT_GET,
-    'id',
+    'user_id',
     FILTER_VALIDATE_INT
 );
 
@@ -142,9 +142,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Redirect
         // --------------------------------------------------
 
-        redirect(
-            BASE_URL . '/app/users/index.php?deleted=1'
-        );
+        redirect('/app/users/dashboard.php');
 
         exit;
 
